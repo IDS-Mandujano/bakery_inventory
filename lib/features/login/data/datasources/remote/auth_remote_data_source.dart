@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import '../../models/user_model.dart';
 
 class AuthRemoteDataSource {
-  final String baseUrl = 'https://tu-api-panaderia.com/api';
+  final String baseUrl = '';
 
   Future<UserModel> login(String email, String password) async {
     final response = await http.post(
