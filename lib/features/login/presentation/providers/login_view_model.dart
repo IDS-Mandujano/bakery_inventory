@@ -29,4 +29,23 @@ class LoginViewModel extends ChangeNotifier {
       return false;
     }
   }
+
+  Future<bool> register(String email, String username, String password) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      await authUseCase.executeRegister(email, username, password);
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _errorMessage = e.toString();
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
 }

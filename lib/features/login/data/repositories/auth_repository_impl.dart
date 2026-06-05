@@ -13,8 +13,8 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<User> onRegister(String email, String username, String password) {
-    throw UnimplementedError();
+  Future<User> onRegister(String email, String username, String password) async {
+    return await remoteDataSource.register(email, username, password);
   }
 
   @override

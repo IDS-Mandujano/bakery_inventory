@@ -1,22 +1,24 @@
-import 'dart:convert';
-import 'package:http/http.dart' as http;
 import '../../models/user_model.dart';
 
 class AuthRemoteDataSource {
-  final String baseUrl = '';
 
   Future<UserModel> login(String email, String password) async {
-    final response = await http.post(
-      Uri.parse('$baseUrl/login'),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'email': email, 'password': password}),
-    );
+    await Future.delayed(const Duration(milliseconds: 1500));
 
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      return UserModel.fromJson(data);
+    if (email.isNotEmpty && password.isNotEmpty) {
+      return UserModel(id: '1', email: email, username: 'Panadero', password: '');
     } else {
-      throw Exception('Error en credenciales o servidor');
+      throw Exception('Por favor ingresa tus credenciales');
+    }
+  }
+
+  Future<UserModel> register(String email, String username, String password) async {
+    await Future.delayed(const Duration(milliseconds: 1500));
+
+    if (email.isNotEmpty && username.isNotEmpty && password.isNotEmpty) {
+      return UserModel(id: '2', email: email, username: username, password: '');
+    } else {
+      throw Exception('Por favor llena todos los campos');
     }
   }
 }
