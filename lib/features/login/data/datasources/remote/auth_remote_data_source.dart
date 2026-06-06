@@ -1,24 +1,37 @@
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import '../../models/user_model.dart';
 
 class AuthRemoteDataSource {
+  final String baseUrl = 'http://127.0.0.1:8080/api';
 
   Future<UserModel> login(String email, String password) async {
-    await Future.delayed(const Duration(milliseconds: 1500));
+    final response = await http.post(
+      Uri.parse('$baseUrl/login'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'email': email, 'password': password}),
+    );
 
-    if (email.isNotEmpty && password.isNotEmpty) {
-      return UserModel(id: '1', email: email, username: 'Panadero', password: '');
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      return UserModel.fromJson(data);
     } else {
-      throw Exception('Por favor ingresa tus credenciales');
+      throw Exception('Error en credenciales o no existe el usuario');
     }
   }
 
   Future<UserModel> register(String email, String username, String password) async {
-    await Future.delayed(const Duration(milliseconds: 1500));
+    final response = await http.post(
+      Uri.parse('$baseUrl/register'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'email': email, 'username': username, 'password': password}),
+    );
 
-    if (email.isNotEmpty && username.isNotEmpty && password.isNotEmpty) {
-      return UserModel(id: '2', email: email, username: username, password: '');
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      final data = jsonDecode(response.body);
+      return UserModel.fromJson(data);
     } else {
-      throw Exception('Por favor llena todos los campos');
+      throw Exception('Error al registrar usuario');
     }
   }
 }
