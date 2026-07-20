@@ -40,7 +40,7 @@ class InventoryViewModel extends ChangeNotifier {
       final newProduct = Product(id: '', name: name, price: price, stock: stock);
       final addedProduct = await repository.addProduct(newProduct);
       _products.add(addedProduct);
-      notifyListeners(); // Aseguramos que la UI se entere de la nueva lista
+      notifyListeners();
       return true;
     } catch (e) {
       _errorMessage = e.toString();
@@ -61,7 +61,7 @@ class InventoryViewModel extends ChangeNotifier {
       final result = await repository.updateProduct(updatedProduct);
       final index = _products.indexWhere((p) => p.id == id);
       if (index != -1) {
-        _products[index] = result; // Usamos el resultado que viene del servidor
+        _products[index] = result;
       }
       notifyListeners();
       return true;

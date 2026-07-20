@@ -11,7 +11,6 @@ class InventoryRepositoryImpl implements InventoryRepository {
   @override
   Future<List<Product>> getProducts() async {
     final List<ProductModel> models = await dataSource.getProducts();
-    // Retornamos como lista de Product (la entidad padre)
     return models;
   }
 
@@ -23,7 +22,6 @@ class InventoryRepositoryImpl implements InventoryRepository {
       price: product.price,
       stock: product.stock,
     );
-    // El datasource devuelve un ProductModel, que es un Product
     return await dataSource.addProduct(model);
   }
 
