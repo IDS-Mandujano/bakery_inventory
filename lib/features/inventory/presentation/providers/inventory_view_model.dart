@@ -13,20 +13,83 @@ class InventoryViewModel extends ChangeNotifier {
   bool _isLoading = false;
   bool get isLoading => _isLoading;
 
+  String? _errorMessage;
+  String? get errorMessage => _errorMessage;
+
   Future<void> loadProducts() async {
     _isLoading = true;
+    _errorMessage = null;
     notifyListeners();
 
-    _products = await repository.getProducts();
-
-    _isLoading = false;
-    notifyListeners();
+    try {
+      _products = await repository.getProducts();
+    } catch (e) {
+      _errorMessage = 'Error al cargar productos';
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
   }
 
-  Future<void> deleteProduct(String id) async {
-    await repository.deleteProduct(id);
-    _products.removeWhere((p) => p.id == id);
+  Future<bool> addProduct(String name, double price, int stock) async {
+    _isLoading = true;
+    _errorMessage = null;
     notifyListeners();
+
+    try {
+      final newProduct = Product(id: '', name: name, price: price, stock: stock);
+      final addedProduct = await repository.addProduct(newProduct);
+      _products.add(addedProduct);
+      notifyListeners(); // Aseguramos que la UI se entere de la nueva lista
+      return true;
+    } catch (e) {
+      _errorMessage = e.toString();
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
   }
 
+  Future<bool> updateProduct(String id, String name, double price, int stock) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final updatedProduct = Product(id: id, name: name, price: price, stock: stock);
+      final result = await repository.updateProduct(updatedProduct);
+      final index = _products.indexWhere((p) => p.id == id);
+      if (index != -1) {
+        _products[index] = result; // Usamos el resultado que viene del servidor
+      }
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _errorMessage = e.toString();
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<bool> deleteProduct(String id) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      await repository.deleteProduct(id);
+      _products.removeWhere((p) => p.id == id);
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _errorMessage = e.toString();
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
 }
