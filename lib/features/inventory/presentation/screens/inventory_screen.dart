@@ -4,6 +4,8 @@ import 'package:transactional_app/features/inventory/presentation/providers/inve
 import 'package:transactional_app/features/inventory/domain/entities/product_entity.dart';
 import 'package:transactional_app/features/login/presentation/screens/login_screen.dart';
 
+import 'package:transactional_app/core/presentation/widgets/loading_indicator.dart';
+
 class InventoryScreen extends StatefulWidget {
   const InventoryScreen({super.key});
 
@@ -38,7 +40,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
         slivers: [
           _buildAppBar(context, viewModel),
           if (viewModel.isLoading && viewModel.products.isEmpty)
-            const SliverFillRemaining(child: Center(child: CircularProgressIndicator()))
+            const SliverFillRemaining(child: LoadingIndicator())
           else if (viewModel.errorMessage != null && viewModel.products.isEmpty)
             _buildErrorState(viewModel)
           else if (viewModel.products.isEmpty)
@@ -198,7 +200,16 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
         ? await viewModel.addProduct(name, price, stock)
         : await viewModel.updateProduct(widget.product!.id, name, price, stock);
 
-    if (success && context.mounted) Navigator.pop(context);
+    if (success && context.mounted) {
+      Navigator.pop(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(widget.product == null ? 'Producto agregado' : 'Producto actualizado')),
+      );
+    } else if (context.mounted && viewModel.errorMessage != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(viewModel.errorMessage!), backgroundColor: Colors.red),
+      );
+    }
   }
 
   void _handleDelete(BuildContext context, InventoryViewModel viewModel) async {
@@ -216,7 +227,16 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
 
     if (confirmed == true && context.mounted) {
       final success = await viewModel.deleteProduct(widget.product!.id);
-      if (success && context.mounted) Navigator.pop(context);
+      if (success && context.mounted) {
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Producto eliminado')),
+        );
+      } else if (context.mounted && viewModel.errorMessage != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(viewModel.errorMessage!), backgroundColor: Colors.red),
+        );
+      }
     }
   }
 
@@ -286,8 +306,10 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
       width: double.infinity,
       height: 56,
       child: FilledButton(
-        onPressed: () => _handleSave(context, viewModel),
-        child: Text(widget.product == null ? 'Agregar' : 'Actualizar'),
+        onPressed: viewModel.isLoading ? null : () => _handleSave(context, viewModel),
+        child: viewModel.isLoading
+            ? const LoadingIndicator(isInButton: true)
+            : Text(widget.product == null ? 'Agregar' : 'Actualizar'),
       ),
     );
   }

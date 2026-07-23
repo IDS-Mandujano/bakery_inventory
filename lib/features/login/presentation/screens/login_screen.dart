@@ -4,6 +4,8 @@ import 'package:transactional_app/features/login/presentation/screens/register_s
 import 'package:transactional_app/features/login/presentation/providers/login_view_model.dart';
 import 'package:transactional_app/features/inventory/presentation/screens/inventory_screen.dart';
 
+import 'package:transactional_app/core/presentation/widgets/loading_indicator.dart';
+
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -126,7 +128,9 @@ class _LoginScreenState extends State<LoginScreen> {
       height: 56,
       child: FilledButton(
         onPressed: viewModel.isLoading ? null : () => _handleLogin(context, viewModel),
-        child: viewModel.isLoading ? const CircularProgressIndicator(color: Colors.white) : const Text('Iniciar Sesión'),
+        child: viewModel.isLoading 
+            ? const LoadingIndicator(isInButton: true) 
+            : const Text('Iniciar Sesión'),
       ),
     );
   }

@@ -1,11 +1,22 @@
 import 'package:flutter/material.dart';
 import '../../domain/entities/product_entity.dart';
-import '../../domain/repositories/inventory_repository.dart';
+import '../../domain/usecases/get_products_usecase.dart';
+import '../../domain/usecases/add_product_usecase.dart';
+import '../../domain/usecases/update_product_usecase.dart';
+import '../../domain/usecases/delete_product_usecase.dart';
 
 class InventoryViewModel extends ChangeNotifier {
-  final InventoryRepository repository;
+  final GetProductsUseCase getProductsUseCase;
+  final AddProductUseCase addProductUseCase;
+  final UpdateProductUseCase updateProductUseCase;
+  final DeleteProductUseCase deleteProductUseCase;
 
-  InventoryViewModel(this.repository);
+  InventoryViewModel({
+    required this.getProductsUseCase,
+    required this.addProductUseCase,
+    required this.updateProductUseCase,
+    required this.deleteProductUseCase,
+  });
 
   List<Product> _products = [];
   List<Product> get products => _products;
@@ -22,9 +33,9 @@ class InventoryViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      _products = await repository.getProducts();
+      _products = await getProductsUseCase.execute();
     } catch (e) {
-      _errorMessage = 'Error al cargar productos';
+      _errorMessage = 'Error al cargar productos: ${e.toString()}';
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -38,12 +49,12 @@ class InventoryViewModel extends ChangeNotifier {
 
     try {
       final newProduct = Product(id: '', name: name, price: price, stock: stock);
-      final addedProduct = await repository.addProduct(newProduct);
+      final addedProduct = await addProductUseCase.execute(newProduct);
       _products.add(addedProduct);
       notifyListeners();
       return true;
     } catch (e) {
-      _errorMessage = e.toString();
+      _errorMessage = 'Error al agregar: ${e.toString()}';
       return false;
     } finally {
       _isLoading = false;
@@ -58,7 +69,7 @@ class InventoryViewModel extends ChangeNotifier {
 
     try {
       final updatedProduct = Product(id: id, name: name, price: price, stock: stock);
-      final result = await repository.updateProduct(updatedProduct);
+      final result = await updateProductUseCase.execute(updatedProduct);
       final index = _products.indexWhere((p) => p.id == id);
       if (index != -1) {
         _products[index] = result;
@@ -66,7 +77,7 @@ class InventoryViewModel extends ChangeNotifier {
       notifyListeners();
       return true;
     } catch (e) {
-      _errorMessage = e.toString();
+      _errorMessage = 'Error al actualizar: ${e.toString()}';
       return false;
     } finally {
       _isLoading = false;
@@ -80,16 +91,21 @@ class InventoryViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      await repository.deleteProduct(id);
+      await deleteProductUseCase.execute(id);
       _products.removeWhere((p) => p.id == id);
       notifyListeners();
       return true;
     } catch (e) {
-      _errorMessage = e.toString();
+      _errorMessage = 'Error al eliminar: ${e.toString()}';
       return false;
     } finally {
       _isLoading = false;
       notifyListeners();
     }
+  }
+
+  void clearError() {
+    _errorMessage = null;
+    notifyListeners();
   }
 }

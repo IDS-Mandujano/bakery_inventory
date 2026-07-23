@@ -1,10 +1,18 @@
 import 'package:flutter/material.dart';
-import '../../domain/usecases/auth_usecase.dart';
+import '../../domain/usecases/login_usecase.dart';
+import '../../domain/usecases/register_usecase.dart';
+import '../../domain/usecases/logout_usecase.dart';
 
 class LoginViewModel extends ChangeNotifier {
-  final AuthUseCase authUseCase;
+  final LoginUseCase loginUseCase;
+  final RegisterUseCase registerUseCase;
+  final LogoutUseCase logoutUseCase;
 
-  LoginViewModel(this.authUseCase);
+  LoginViewModel({
+    required this.loginUseCase,
+    required this.registerUseCase,
+    required this.logoutUseCase,
+  });
 
   bool _isLoading = false;
   bool get isLoading => _isLoading;
@@ -18,7 +26,7 @@ class LoginViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      await authUseCase.executeLogin(email, password);
+      await loginUseCase.execute(email, password);
       _isLoading = false;
       notifyListeners();
       return true;
@@ -36,7 +44,7 @@ class LoginViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      await authUseCase.executeRegister(email, username, password);
+      await registerUseCase.execute(email, username, password);
       _isLoading = false;
       notifyListeners();
       return true;
@@ -48,4 +56,12 @@ class LoginViewModel extends ChangeNotifier {
     }
   }
 
+  Future<void> logout(String id) async {
+    try {
+      await logoutUseCase.execute(id);
+    } catch (e) {
+      _errorMessage = e.toString();
+      notifyListeners();
+    }
+  }
 }
